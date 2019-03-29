@@ -67,10 +67,7 @@ else{
 function remove_user_from_group($groupname) {
     try
     {
-        $objADSI = [ADSI]"WinNT://./$groupname,group"
-        $objADSIUser = [ADSI]"WinNT://$domain/$username"
-        [array]$objMembers = $objADSI.psbase.Invoke("Members")
-        $objADSI.psbase.Invoke("Remove",$objADSIUser.psbase.path)
+        Remove-LocalGroupMember -Group $groupname -Member $login
         $message = "User removed from group: $groupname"
         write-host $message
     }

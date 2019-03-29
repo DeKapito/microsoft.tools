@@ -48,7 +48,7 @@
 	zenoss-lpu.ps1 -u zenny@zenoss.com
 	.EXAMPLE
 	Local account
-	zenoss-lpu.ps1 -u benny 
+	zenoss-lpu.ps1 -u benny
     .EXAMPLE
     Update service permissions for domain account
     zenoss-lpu.ps1 -u zenny@zenoss.com -force
@@ -133,10 +133,7 @@ function get_user_sid($getuser=$userfqdn) {
 function add_user_to_group($groupname) {
     try
     {
-        $objADSI = [ADSI]"WinNT://./$groupname,group"
-        $objADSIUser = [ADSI]"WinNT://$domain/$username"
-        [array]$objMembers = $objADSI.psbase.Invoke("Members")
-        $objADSI.psbase.Invoke("Add",$objADSIUser.psbase.path)
+        Add-LocalGroupMember -Group $groupname -Member $usersid
         $message = "User added to group: $groupname"
         send_event $message 'Information'
     }
@@ -193,7 +190,7 @@ function get_db_instances(){
 	$regkey2003 = 'HKLM:\Software\Microsoft\Microsoft SQL Server\'
 	if(Test-Path $regkey2008){
 		$objsqlreg = Get-ItemProperty $regkey2008
-		return $objsqlreg.InstalledInstances 
+		return $objsqlreg.InstalledInstances
 	}
 
 	if(Test-Path $regkey2003){
@@ -208,7 +205,7 @@ function update_sql_perms($dbinstance, $permission){
 	write-host "Setting permissions on DB Instance: $dbinstance"
 
 	if($dbinstnace -eq "MSSQLSERVER"){
-		$dbinstancename = $domain		
+		$dbinstancename = $domain
 	}
 	else{
 		$dbinstancename = '{0}\{1}' -f $domain, $dbinstance
@@ -284,7 +281,7 @@ function set_registry_sd_value($regkey, $property, $usersid, $accessMask){
 
 
 function allow_access_to_winrm($usersid) {
-	
+
 	$defaultkey = "O:NSG:BAD:P(A;;GA;;;BA)S:P(AU;FA;GA;;;WD)(AU;SA;GWGX;;;WD)"
 	$sddlkey = "HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Service"
 	if($usersid.Length -gt 5){
@@ -439,12 +436,12 @@ $usersid = get_user_sid
 # Root/RSOP/Computer  -->  OperatingSystem modeler - Win32_ComputerSystem
 
 $namespaces = @(
-	"Root", 
-	"Root/CIMv2", 
-	"Root/DEFAULT", 
-	"Root/RSOP", 
+	"Root",
+	"Root/CIMv2",
+	"Root/DEFAULT",
+	"Root/RSOP",
 	"Root/RSOP/Computer",
-	"Root/WMI", 
+	"Root/WMI",
 	"Root/CIMv2/Security/MicrosoftTpm"
 	)
 $ns = Get-WMIObject -class __Namespace -namespace root -Filter "name='WebAdministration'"
